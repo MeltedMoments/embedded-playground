@@ -22,10 +22,9 @@ constexpr float IDEAL_HUMIDITY      = 45.0;
 constexpr float TEMPERATURE_PENALTY = 4.0;
 constexpr float HUMIDITY_PENALTY    = 0.9;
 
-
 unsigned long last_heartbeat_time = 0;
 unsigned long last_sensor_time = 0;
-unsigned long next_display_time = 0;
+unsigned long last_display_time = 0;
 float current_temperature;
 float current_humidity;
 bool aht_ready = false;
@@ -37,7 +36,7 @@ rgb_lcd lcd;
 void setup() {
     Serial.begin(115200);
     Serial.println("Starting I2C");
-    delay(1000);
+    // delay(1000);
     // Set up the AHT20
     Wire.begin(SDA_PIN, SCL_PIN);
     Wire.setTimeOut(100);
@@ -55,7 +54,7 @@ void setup() {
     lcd.setCursor(0, 1);
     lcd.print("Ready");
     // Show display 1 sec after startup
-    next_display_time = millis() + START_DISPLAY_DELAY_MS;
+    last_display_time = millis() - (DISPLAY_INTERVAL_MS - START_DISPLAY_DELAY_MS);
 }
 
 void show_heartbeat() {
@@ -75,7 +74,7 @@ void heartbeat() {
     last_heartbeat_time = now;
 }
 
-// V.Good =10, Good=7-9, OK 4-6, Bad:1-3, V.Bad:0
+// V.Good: 100, Good: 70-99, Okay: 40-69, Bad: 10-39, V.Bad: 0-9
 String comfort_text (float comfort) {
     if (comfort >= 100.0) return "V.Good";
     if (comfort >= 70.0)  return "Good  ";
@@ -89,7 +88,7 @@ float calculate_comfort_score(float temperature, float humidity) {
     // Penalise the score for every PENALTY away from the ideal, 
     // for both temp and humidity
     score -= abs(temperature - IDEAL_TEMPERATURE) * TEMPERATURE_PENALTY;
-    score -= abs(temperature - IDEAL_HUMIDITY)    * HUMIDITY_PENALTY;
+    score -= abs(humidity - IDEAL_HUMIDITY) * HUMIDITY_PENALTY;
 
     score = std::max(0.0F, score);
     score = std::min(100.0F, score);
@@ -122,17 +121,22 @@ void show_temp(float temperature, float humidity) {
 
 void update_display() {
     unsigned long now = millis();
-    if (now < next_display_time) {
+    if (now - last_display_time < DISPLAY_INTERVAL_MS) {
         return;
     }
-    if (have_reading) {
-        show_temp(current_temperature, current_humidity);
-    } else {
-        Serial.println("No reading");
-        next_display_time = now + 1000;
-    }
 
-    next_display_time = now + DISPLAY_INTERVAL_MS;
+    // if (now < next_display_time) {
+    //     return;
+    // }
+    if (! have_reading) {
+        Serial.println("No reading");
+        return;
+    }
+    show_temp(current_temperature, current_humidity);
+    last_display_time = now;
+        // next_display_time = now + 1000;
+
+    // next_display_time = now + DISPLAY_INTERVAL_MS;
 }
 
 void read_sensor() {
