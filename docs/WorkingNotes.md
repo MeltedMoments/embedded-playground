@@ -156,6 +156,14 @@ build_flags =
 - project org
 - then grove 16x2 display
 
+## 20260914
+- yesterday got the aht20 and 16x2 display working together on the same I2C bus
+- needed to remember how to power and use a breadboard!
+- esp doesn't need to live on a BB, but use a BB as a bridge
+- grove's is connected by duponts, connections are a bit wobbly
+
+- started using arduino String, and also std::min and max()
+- heartbeat now displays on the lcd :)
 
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===

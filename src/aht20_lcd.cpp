@@ -14,6 +14,7 @@ constexpr int LCD_ROWS = 2;
 constexpr unsigned long HEARTBEAT_INTERVAL_MS = 1000;
 constexpr unsigned long SENSOR_INTERVAL_MS = 2000;
 constexpr unsigned long DISPLAY_INTERVAL_MS = 10000;
+constexpr unsigned long START_DISPLAY_DELAY_MS = 1000;
 
 // Comfort calculation
 constexpr float IDEAL_TEMPERATURE   = 23.0;
@@ -24,18 +25,20 @@ constexpr float HUMIDITY_PENALTY    = 0.9;
 
 unsigned long last_heartbeat_time = 0;
 unsigned long last_sensor_time = 0;
-unsigned long last_display_time = 0;
+unsigned long next_display_time = 0;
+float current_temperature;
+float current_humidity;
 bool aht_ready = false;
 bool heartbeat_on = false;
+bool have_reading = false;
 Adafruit_AHTX0 aht;
 rgb_lcd lcd; 
 
 void setup() {
     Serial.begin(115200);
-    // delay(3000);
-
     Serial.println("Starting I2C");
-
+    delay(1000);
+    // Set up the AHT20
     Wire.begin(SDA_PIN, SCL_PIN);
     Wire.setTimeOut(100);
     aht_ready = aht.begin(&Wire);
@@ -45,15 +48,14 @@ void setup() {
     }
     Serial.println("AHT20 ready");
 
+    // Set up the LCD display
     lcd.begin(LCD_COLS, LCD_ROWS);
-
     lcd.setCursor(0, 0);
     lcd.print("Hello ESP");
-
     lcd.setCursor(0, 1);
     lcd.print("Ready");
     // Show display 1 sec after startup
-    last_display_time = millis() + DISPLAY_INTERVAL_MS - 1000;
+    next_display_time = millis() + START_DISPLAY_DELAY_MS;
 }
 
 void show_heartbeat() {
@@ -95,11 +97,6 @@ float calculate_comfort_score(float temperature, float humidity) {
 }
 
 void show_temp(float temperature, float humidity) {
-    unsigned long now = millis();
-    if (now - last_display_time < DISPLAY_INTERVAL_MS) {
-        return;
-    }
-
     float comfort = calculate_comfort_score(temperature, humidity);
     Serial.printf("Temperature %.2f C Humidity %.2f %%, Score: %.2f\n",
         temperature,
@@ -121,26 +118,36 @@ void show_temp(float temperature, float humidity) {
     buffer += comfort_text(comfort);
     lcd.setCursor(0,1);
     lcd.print(buffer);
-
-    last_display_time = now;
 }
 
-void dump_sensor_event(const sensors_event_t &event) {
-    Serial.printf("version:   %d\r\n", event.version);
-    Serial.printf("sensor_id: %d\r\n", event.sensor_id);
-    Serial.printf("type:      %d\r\n", event.type);
-    Serial.printf("timestamp: %lu\r\n", event.timestamp);
+void update_display() {
+    unsigned long now = millis();
+    if (now < next_display_time) {
+        return;
+    }
+    if (have_reading) {
+        show_temp(current_temperature, current_humidity);
+    } else {
+        Serial.println("No reading");
+        next_display_time = now + 1000;
+    }
+
+    next_display_time = now + DISPLAY_INTERVAL_MS;
 }
 
 void read_sensor() {
     unsigned long now = millis();
-    if (now - last_sensor_time >= SENSOR_INTERVAL_MS) {
-        sensors_event_t humidity;
-        sensors_event_t temperature;
-        aht.getEvent(&humidity, &temperature);
-        show_temp(temperature.temperature, humidity.relative_humidity);
-        last_sensor_time = now;
+    if (now - last_sensor_time < SENSOR_INTERVAL_MS) {
+        return;
     }
+
+    sensors_event_t humidity;
+    sensors_event_t temperature;
+    aht.getEvent(&humidity, &temperature);
+    current_temperature = temperature.temperature;
+    current_humidity = humidity.relative_humidity;
+    have_reading = true;
+    last_sensor_time = now;
 }
 
 void loop() {
@@ -150,4 +157,5 @@ void loop() {
     }
     heartbeat();
     read_sensor();
+    update_display();
 }
