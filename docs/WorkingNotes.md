@@ -165,6 +165,20 @@ build_flags =
 - started using arduino String, and also std::min and max()
 - heartbeat now displays on the lcd :)
 
+### notes
+- oled 
+```
+OLED signal   ESP32-S3       Purpose        (wire)
+---------------------------------------------
+VCC           3V3            power          red
+GND           GND            ground         black
+DIN           GPIO 11        SPI MOSI/data  orange
+CLK           GPIO 12        SPI clock      green
+CS            GPIO 10        chip select    grey 
+DC            GPIO 9         data/command   blue
+RST           GPIO 8         reset          purple
+```
+
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===

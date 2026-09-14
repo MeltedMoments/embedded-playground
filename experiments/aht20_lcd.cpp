@@ -36,7 +36,6 @@ rgb_lcd lcd;
 void setup() {
     Serial.begin(115200);
     Serial.println("Starting I2C");
-    // delay(1000);
     // Set up the AHT20
     Wire.begin(SDA_PIN, SCL_PIN);
     Wire.setTimeOut(100);
@@ -124,19 +123,12 @@ void update_display() {
     if (now - last_display_time < DISPLAY_INTERVAL_MS) {
         return;
     }
-
-    // if (now < next_display_time) {
-    //     return;
-    // }
     if (! have_reading) {
         Serial.println("No reading");
         return;
     }
     show_temp(current_temperature, current_humidity);
     last_display_time = now;
-        // next_display_time = now + 1000;
-
-    // next_display_time = now + DISPLAY_INTERVAL_MS;
 }
 
 void read_sensor() {
