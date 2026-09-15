@@ -1,12 +1,13 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <rgb_lcd.h>
+// #include <rgb_lcd.h>
 // #include <Adafruit_AHTX0.h>
 #include <algorithm>
 #include  <Adafruit_GFX.h>
 #include  <Adafruit_SH110X.h>
 
 #include "climate_sensor.h"
+#include "lcd_display.h"
 #include "config.h"
 
 // Hardware 
@@ -21,8 +22,8 @@ constexpr int OLED_HEIGHT  = 128;
 
 // constexpr int SDA_PIN = 4;
 // constexpr int SCL_PIN = 6;
-constexpr int LCD_COLS = 16;
-constexpr int LCD_ROWS = 2;
+// constexpr int LCD_COLS = 16;
+// constexpr int LCD_ROWS = 2;
 
 // Sensor intervals
 // constexpr unsigned long HEARTBEAT_INTERVAL_MS = 1000;
@@ -54,7 +55,7 @@ Adafruit_SH1107 display(
     OLED_CS
 );
 // Adafruit_AHTX0 aht;
-rgb_lcd lcd; 
+// rgb_lcd lcd; 
 
 const unsigned char heart_8x8[] PROGMEM = {
     0b01100110,
@@ -111,13 +112,13 @@ const unsigned char heart_12x12[] PROGMEM = {
 //     Serial.println("AHT20 ready");
 // }
 
-void init_lcd() {
-    lcd.begin(LCD_COLS, LCD_ROWS);
-    lcd.setCursor(0, 0);
-    lcd.print("Hello ESP");
-    lcd.setCursor(0, 1);
-    lcd.print("Ready");
-}
+// void init_lcd() {
+//     lcd.begin(LCD_COLS, LCD_ROWS);
+//     lcd.setCursor(0, 0);
+//     lcd.print("Hello ESP");
+//     lcd.setCursor(0, 1);
+//     lcd.print("Ready");
+// }
 
 void init_oled() {
     Serial.println("Starting OLED");
@@ -140,16 +141,16 @@ void setup() {
     delay(3000);
     // init_aht20();
     setup_climate_sensor();
-    init_lcd();
+    setup_lcd_display();
     init_oled();
     // Show display 1 sec after startup
     last_display_time = millis() - (DISPLAY_INTERVAL_MS - START_DISPLAY_DELAY_MS);
 }
 
-void lcd_heartbeat() {
-    lcd.setCursor(15, 1);
-    lcd.print(heartbeat_on ? '.' : ' ');
-}
+// void lcd_heartbeat() {
+//     lcd.setCursor(15, 1);
+//     lcd.print(heartbeat_on ? '.' : ' ');
+// }
 
 void oled_heartbeat() {
     display.setTextColor(SH110X_WHITE);
@@ -178,7 +179,7 @@ void heartbeat() {
 
     Serial.println("Heartbeat");
     heartbeat_on = ! heartbeat_on;
-    lcd_heartbeat();
+    show_lcd_heartbeat(heartbeat_on);
     oled_heartbeat();
     last_heartbeat_time = now;
 }
@@ -204,22 +205,22 @@ float calculate_comfort_score(float temperature, float humidity) {
     return score;
 }
 
-void show_lcd(float temperature, float humidity, float comfort) {
-    // Line 1
-    String buffer = "T:";
-    buffer += String(temperature, 1);
-    buffer += "C H:";
-    buffer += String(humidity, 1);
-    buffer += "%";
-    lcd.setCursor(0, 0);
-    lcd.print(buffer);
+// void show_lcd(float temperature, float humidity, float comfort) {
+//     // Line 1
+//     String buffer = "T:";
+//     buffer += String(temperature, 1);
+//     buffer += "C H:";
+//     buffer += String(humidity, 1);
+//     buffer += "%";
+//     lcd.setCursor(0, 0);
+//     lcd.print(buffer);
 
-    // Line 2 
-    buffer = "Comfort: ";
-    buffer += comfort_text(comfort);
-    lcd.setCursor(0,1);
-    lcd.print(buffer);
-}
+//     // Line 2 
+//     buffer = "Comfort: ";
+//     buffer += comfort_text(comfort);
+//     lcd.setCursor(0,1);
+//     lcd.print(buffer);
+// }
 
 void show_oled(float temperature, float humidity, float comfort) {
     display.clearDisplay();
@@ -271,7 +272,7 @@ void update_display() {
         comfort
     );
     
-    show_lcd(current_temperature, current_humidity, comfort);
+    show_lcd_climate(current_temperature, current_humidity, comfort);
     show_oled(current_temperature, current_humidity, comfort);
     last_display_time = now;
 }
