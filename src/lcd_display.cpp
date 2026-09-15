@@ -8,12 +8,6 @@
 #include "climate.h"
 #include "config.h"
 
-// Adafruit_AHTX0 aht;
-// bool aht_ready = false;
-// bool have_climate_reading = false;
-// unsigned long last_sensor_time = 0;
-// float current_temperature = 0.0;
-// float current_humidity = 0.0;
 rgb_lcd lcd; 
 
 void setup_lcd_display() {
