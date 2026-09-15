@@ -179,6 +179,19 @@ DC            GPIO 9         data/command   blue
 RST           GPIO 8         reset          purple
 ```
 
+### eod
+- okay nice, oled hooked in as well, now updates temps on oled and lcd
+- tiny 8x8 bitmap to actually display a heart as the heartbeat on the oled :)
+
+### next time
+- Add history to eg temperature  and display small graph 
+
+## 20260915
+- stuff from reichelt should arrive today, and Herman, and BAM too
+- anyway, try to implement a "rolling history graph".
+
+
+
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===

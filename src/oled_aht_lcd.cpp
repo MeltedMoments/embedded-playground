@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <rgb_lcd.h>
-#include <Adafruit_AHTX0.h>
+// #include <Adafruit_AHTX0.h>
 #include <algorithm>
 #include  <Adafruit_GFX.h>
 #include  <Adafruit_SH110X.h>
 
+#include "climate_sensor.h"
+#include "config.h"
 
 // Hardware 
 constexpr int OLED_MOSI = 11;       // SPI MOSI/data
@@ -17,16 +19,16 @@ constexpr int OLED_RST  = 8;        // reset
 constexpr int OLED_WIDTH = 64;  
 constexpr int OLED_HEIGHT  = 128; 
 
-constexpr int SDA_PIN = 4;
-constexpr int SCL_PIN = 6;
+// constexpr int SDA_PIN = 4;
+// constexpr int SCL_PIN = 6;
 constexpr int LCD_COLS = 16;
 constexpr int LCD_ROWS = 2;
 
 // Sensor intervals
-constexpr unsigned long HEARTBEAT_INTERVAL_MS = 1000;
-constexpr unsigned long SENSOR_INTERVAL_MS = 2000;
-constexpr unsigned long DISPLAY_INTERVAL_MS = 10000;
-constexpr unsigned long START_DISPLAY_DELAY_MS = 1000;
+// constexpr unsigned long HEARTBEAT_INTERVAL_MS = 1000;
+// constexpr unsigned long SENSOR_INTERVAL_MS = 2000;
+// constexpr unsigned long DISPLAY_INTERVAL_MS = 10000;
+// constexpr unsigned long START_DISPLAY_DELAY_MS = 1000;
 
 // Comfort calculation
 constexpr float IDEAL_TEMPERATURE   = 23.0;
@@ -35,13 +37,13 @@ constexpr float TEMPERATURE_PENALTY = 4.0;
 constexpr float HUMIDITY_PENALTY    = 0.9;
 
 unsigned long last_heartbeat_time = 0;
-unsigned long last_sensor_time = 0;
+// unsigned long last_sensor_time = 0;
 unsigned long last_display_time = 0;
-float current_temperature;
-float current_humidity;
-bool aht_ready = false;
+// float current_temperature;
+// float current_humidity;
+// bool aht_ready = false;
 bool heartbeat_on = false;
-bool have_reading = false;
+// bool have_reading = false;
 Adafruit_SH1107 display(
     OLED_WIDTH,
     OLED_HEIGHT,
@@ -51,7 +53,7 @@ Adafruit_SH1107 display(
     OLED_RST,
     OLED_CS
 );
-Adafruit_AHTX0 aht;
+// Adafruit_AHTX0 aht;
 rgb_lcd lcd; 
 
 const unsigned char heart_8x8[] PROGMEM = {
@@ -98,16 +100,16 @@ const unsigned char heart_12x12[] PROGMEM = {
 //     0b000000000000
 // };
 
-void init_aht20() {
-    Wire.begin(SDA_PIN, SCL_PIN);
-    Wire.setTimeOut(100);
-    aht_ready = aht.begin(&Wire);
-    if (! aht_ready) {
-        Serial.println("AHT20 init failed");
-        return;
-    }
-    Serial.println("AHT20 ready");
-}
+// void init_aht20() {
+//     Wire.begin(SDA_PIN, SCL_PIN);
+//     Wire.setTimeOut(100);
+//     aht_ready = aht.begin(&Wire);
+//     if (! aht_ready) {
+//         Serial.println("AHT20 init failed");
+//         return;
+//     }
+//     Serial.println("AHT20 ready");
+// }
 
 void init_lcd() {
     lcd.begin(LCD_COLS, LCD_ROWS);
@@ -135,7 +137,9 @@ void init_oled() {
 
 void setup() {
     Serial.begin(115200);
-    init_aht20();
+    delay(3000);
+    // init_aht20();
+    setup_climate_sensor();
     init_lcd();
     init_oled();
     // Show display 1 sec after startup
@@ -255,7 +259,7 @@ void update_display() {
         return;
     }
 
-    if (! have_reading) {
+    if (! have_climate_reading) {
         Serial.println("No reading");
         return;
     }
@@ -272,20 +276,20 @@ void update_display() {
     last_display_time = now;
 }
 
-void read_sensor() {
-    unsigned long now = millis();
-    if (now - last_sensor_time < SENSOR_INTERVAL_MS) {
-        return;
-    }
+// void read_sensor() {
+//     unsigned long now = millis();
+//     if (now - last_sensor_time < SENSOR_INTERVAL_MS) {
+//         return;
+//     }
 
-    sensors_event_t humidity;
-    sensors_event_t temperature;
-    aht.getEvent(&humidity, &temperature);
-    current_temperature = temperature.temperature;
-    current_humidity = humidity.relative_humidity;
-    have_reading = true;
-    last_sensor_time = now;
-}
+//     sensors_event_t humidity;
+//     sensors_event_t temperature;
+//     aht.getEvent(&humidity, &temperature);
+//     current_temperature = temperature.temperature;
+//     current_humidity = humidity.relative_humidity;
+//     have_reading = true;
+//     last_sensor_time = now;
+// }
 
 void loop() {
     if (! aht_ready) {
@@ -293,6 +297,6 @@ void loop() {
         return;
     }
     heartbeat();
-    read_sensor();
+    read_climate_sensor();
     update_display();
 }
