@@ -8,6 +8,7 @@
 
 #include "climate_sensor.h"
 #include "lcd_display.h"
+#include "climate.h"
 #include "config.h"
 
 // Hardware 
@@ -31,11 +32,11 @@ constexpr int OLED_HEIGHT  = 128;
 // constexpr unsigned long DISPLAY_INTERVAL_MS = 10000;
 // constexpr unsigned long START_DISPLAY_DELAY_MS = 1000;
 
-// Comfort calculation
-constexpr float IDEAL_TEMPERATURE   = 23.0;
-constexpr float IDEAL_HUMIDITY      = 45.0;
-constexpr float TEMPERATURE_PENALTY = 4.0;
-constexpr float HUMIDITY_PENALTY    = 0.9;
+// // Comfort calculation
+// constexpr float IDEAL_TEMPERATURE   = 23.0;
+// constexpr float IDEAL_HUMIDITY      = 45.0;
+// constexpr float TEMPERATURE_PENALTY = 4.0;
+// constexpr float HUMIDITY_PENALTY    = 0.9;
 
 unsigned long last_heartbeat_time = 0;
 // unsigned long last_sensor_time = 0;
@@ -184,26 +185,26 @@ void heartbeat() {
     last_heartbeat_time = now;
 }
 
-// V.Good: 100, Good: 70-99, Okay: 40-69, Bad: 10-39, V.Bad: 0-9
-String comfort_text (float comfort) {
-    if (comfort >= 100.0) return "V.Good";
-    if (comfort >= 70.0)  return "Good  ";
-    if (comfort >= 40.0)  return "Okay  ";
-    if (comfort >= 10.0)  return "Bad   ";
-    return "V.Bad ";
-}
+// // V.Good: 100, Good: 70-99, Okay: 40-69, Bad: 10-39, V.Bad: 0-9
+// String comfort_text (float comfort) {
+//     if (comfort >= 100.0) return "V.Good";
+//     if (comfort >= 70.0)  return "Good  ";
+//     if (comfort >= 40.0)  return "Okay  ";
+//     if (comfort >= 10.0)  return "Bad   ";
+//     return "V.Bad ";
+// }
 
-float calculate_comfort_score(float temperature, float humidity) {
-    float score = 100.0;     // best possible
-    // Penalise the score for every PENALTY away from the ideal, 
-    // for both temp and humidity
-    score -= abs(temperature - IDEAL_TEMPERATURE) * TEMPERATURE_PENALTY;
-    score -= abs(humidity - IDEAL_HUMIDITY) * HUMIDITY_PENALTY;
+// float calculate_comfort_score(float temperature, float humidity) {
+//     float score = 100.0;     // best possible
+//     // Penalise the score for every PENALTY away from the ideal, 
+//     // for both temp and humidity
+//     score -= abs(temperature - IDEAL_TEMPERATURE) * TEMPERATURE_PENALTY;
+//     score -= abs(humidity - IDEAL_HUMIDITY) * HUMIDITY_PENALTY;
 
-    score = std::max(0.0F, score);
-    score = std::min(100.0F, score);
-    return score;
-}
+//     score = std::max(0.0F, score);
+//     score = std::min(100.0F, score);
+//     return score;
+// }
 
 // void show_lcd(float temperature, float humidity, float comfort) {
 //     // Line 1
@@ -265,14 +266,14 @@ void update_display() {
         return;
     }
 
-    float comfort = calculate_comfort_score(current_temperature, current_humidity);
+    float comfort = comfort_score(current_temperature, current_humidity);
     Serial.printf("Temperature %.2f C Humidity %.2f %%, Score: %.2f\n",
         current_temperature,
         current_humidity,
         comfort
     );
     
-    show_lcd_climate(current_temperature, current_humidity, comfort);
+    show_lcd_climate(current_temperature, current_humidity);
     show_oled(current_temperature, current_humidity, comfort);
     last_display_time = now;
 }

@@ -5,6 +5,7 @@
 #include <rgb_lcd.h>
 
 #include "lcd_display.h"
+#include "climate.h"
 #include "config.h"
 
 // Adafruit_AHTX0 aht;
@@ -28,7 +29,7 @@ void show_lcd_heartbeat(bool heartbeat_on) {
     lcd.print(heartbeat_on ? '.' : ' ');
 }
 
-void show_lcd_climate(float temperature, float humidity, float comfort) {
+void show_lcd_climate(float temperature, float humidity) {
     // Line 1
     String buffer = "T:";
     buffer += String(temperature, 1);
@@ -39,8 +40,9 @@ void show_lcd_climate(float temperature, float humidity, float comfort) {
     lcd.print(buffer);
 
     // Line 2 
+    float comfort = comfort_score(temperature, humidity);
     buffer = "Comfort: ";
-    // buffer += comfort_text(comfort);
+    buffer += comfort_text(comfort);
     lcd.setCursor(0,1);
     lcd.print(buffer);
 }
