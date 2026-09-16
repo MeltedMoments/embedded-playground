@@ -206,6 +206,20 @@ RST           GPIO 8         reset          purple
 - then solder a neopixel
 - and try it for real :)
 
+### notes
+- moved heartbeat code to heartbeat.cpp, that completes the refactoring
+    - hmm, one more improvement: return bool from setup-<display>, and only try to display if we've got one, but maybe next time. 
+- moved things around in platformio.ini
+    - main project is 'esp32'
+    - can run (wokwi) sub-projects neopixel-test (strip_fill_test) and neopixel-wokwi (hysteresis-test)
+    ```
+    # in project root
+    ./wokwi-build neopixel-wokwi  (then open wokwi simulator)
+    ```
+
+    - program in the esp32 env is set as default in PIO, so can build and upload as normal
+- Start soldering! 
+
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===

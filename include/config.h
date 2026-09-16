@@ -14,7 +14,7 @@ constexpr int OLED_DC   = 9;        // data/command
 constexpr int OLED_RST  = 8;        // reset
 
 // Sensor update intervals
-constexpr unsigned long HEARTBEAT_INTERVAL_MS = 2500;
+constexpr unsigned long HEARTBEAT_INTERVAL_MS = 500;
 constexpr unsigned long SENSOR_INTERVAL_MS = 2000;
 constexpr unsigned long DISPLAY_INTERVAL_MS = 10000;
 constexpr unsigned long START_DISPLAY_DELAY_MS = 1000;
