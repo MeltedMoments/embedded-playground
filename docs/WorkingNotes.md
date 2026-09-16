@@ -190,7 +190,21 @@ RST           GPIO 8         reset          purple
 - stuff from reichelt should arrive today, and Herman, and BAM too
 - anyway, try to implement a "rolling history graph".
 
+### eod
+- decided to split the code instead, much saner
+- soldering stuff arrived so will hopefully wire stuff up next time
 
+### next time
+- move experiments to src/
+- try runnable neopixel wokwi experiment, sep from main working code
+- get neopixel and microphone working 
+- 
+
+## 20260916
+- finally managed to change vscode project colours so I know where I am (though colours still need improvement)
+- right first thing is to reorg stuff so that I can run the neopixel wokwi demo
+- then solder a neopixel
+- and try it for real :)
 
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
