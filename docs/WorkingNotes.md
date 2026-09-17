@@ -244,6 +244,21 @@ L/R    ─────> GND
 - Apply Root Mean Squared: calculated as the square root of the mean of the squares of a set of values
     - Squaring places a heavier weight on larger spikes or errors, making RMS very sensitive to extreme values
 
+```
+RMS
+  └─ size of the numbers coming from our microphone
+
+dBFS = decibels relative to Full Scale
+  └─ how large that digital signal is relative to
+     the largest digital signal the system can represent
+
+dB SPL = decibels Sound Pressure Level
+  └─ how large the actual pressure fluctuations in the air are
+```
+
+- Wonderful, first working version of noise -> light display! Very pleased. 
+    - Soldering works, wiring works, code works.
+    - And I understand (more or less) what's going on, chat's in Super Teacher Mode, so isn't just feeding me code. 
 
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
