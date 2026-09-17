@@ -111,20 +111,36 @@ void read_microphone() {
     int samples_read = bytes_read / sizeof(int32_t);
     int32_t minimum = INT32_MAX;
     int32_t maximum = INT32_MIN;
-    // long double total = 0;
+
+    // calculate the mean of the samples
+    double total = 0.0;
     for (int i = 0; i < samples_read; i++) {
         minimum = min(minimum, samples[i]);
         maximum = max(maximum, samples[i]);
-        // total += samples[i]*samples[i]
+        total += samples[i];
     }
+    double mean = total / samples_read;
+
+    // Now calculate RMS relative to the mean
+    double square_total = 0.0;
+    for (int i = 0; i < samples_read; i++) {
+        // minimum = min(minimum, samples[i]);
+        // maximum = max(maximum, samples[i]);
+        double sample = (double)samples[i] - mean;
+        square_total += sample * sample;
+    }
+
+    double rms = sqrt(square_total / samples_read);
 
     int64_t delta = (int64_t)(maximum) - (int64_t)(minimum);
     Serial.printf(
-        "samples: %d  min: %ld  max: %ld delta %lld\r\n",
+        "samples: %d  min: %lld  max: %ld delta %lld rms %.0f mean %.0f\r\n",
         samples_read,
-        (long)minimum,
-        (long)maximum,
-        (long long)(maximum - minimum)
+        (long long)minimum,
+        (long long)maximum,
+        (long long)(maximum - minimum),
+        rms,
+        mean
     );
 }
 const uint32_t colours[] = {

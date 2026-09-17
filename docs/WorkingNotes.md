@@ -239,6 +239,11 @@ L/R    ─────> GND
 ## 20260917
 - Neat new magnetic third hand :)
 - okay first thing is to sort out what the min,max numbers mean
+    - 16ms samples of the peak/troughs, deltas are what we're interested in
+
+- Apply Root Mean Squared: calculated as the square root of the mean of the squares of a set of values
+    - Squaring places a heavier weight on larger spikes or errors, making RMS very sensitive to extreme values
+
 
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
