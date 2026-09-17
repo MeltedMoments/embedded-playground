@@ -109,38 +109,55 @@ void read_microphone() {
     }
 
     int samples_read = bytes_read / sizeof(int32_t);
+    // just retain the meaningful bits
+    int32_t sampled[SAMPLE_COUNT];      // for shifted values
+    for (int i = 0; i < samples_read; i++) {
+        // int32_t raw = samples[i];
+        sampled[i] = samples[i] >> 6;
+    }    
+
+    // calculate the min, max and mean of the samples
     int32_t minimum = INT32_MAX;
     int32_t maximum = INT32_MIN;
-
-    // calculate the mean of the samples
     double total = 0.0;
     for (int i = 0; i < samples_read; i++) {
-        minimum = min(minimum, samples[i]);
-        maximum = max(maximum, samples[i]);
-        total += samples[i];
+        int32_t sample = sampled[i];
+        minimum = min(minimum, sample);
+        maximum = max(maximum, sample);
+        total += sample;
     }
     double mean = total / samples_read;
+
+    // double total = 0.0;
+    // for (int i = 0; i < samples_read; i++) {
+    //     minimum = min(minimum, samples[i]);
+    //     maximum = max(maximum, samples[i]);
+    //     total += samples[i];
+    // }
+    // double mean = total / samples_read;
 
     // Now calculate RMS relative to the mean
     double square_total = 0.0;
     for (int i = 0; i < samples_read; i++) {
-        // minimum = min(minimum, samples[i]);
-        // maximum = max(maximum, samples[i]);
-        double sample = (double)samples[i] - mean;
+        // int32_t raw = samples[i];
+        // int32_t shifted = raw >> 6;
+        double sample = (double)sampled[i] - mean;
         square_total += sample * sample;
     }
-
     double rms = sqrt(square_total / samples_read);
+    // (crudely) convert the rms to dB
+    double db = 20.0 * log10(rms);
 
     int64_t delta = (int64_t)(maximum) - (int64_t)(minimum);
     Serial.printf(
-        "samples: %d  min: %lld  max: %ld delta %lld rms %.0f mean %.0f\r\n",
+        "samples: %d  min: %lld  max: %ld delta %lld rms %.0f mean %.0f raw_db %.1f\r\n",
         samples_read,
         (long long)minimum,
         (long long)maximum,
         (long long)(maximum - minimum),
         rms,
-        mean
+        mean, 
+        db
     );
 }
 const uint32_t colours[] = {
@@ -210,3 +227,18 @@ void loop() {
     read_microphone();
     delay(250);
 }
+
+
+        // double sample = (double)samples[i] - mean;
+        // square_total += sample * sample;
+        // Serial.printf(
+        //     "raw: %11ld  0x%08lX   >>6: %6ld\r\n",
+        //     (long)raw,
+        //     (unsigned long)raw,
+        //     (long)shifted
+        // );        // Serial.printf(
+        //     "%ld  0x%08lX\r\n",
+        //     (long)samples[i],
+        //     (unsigned long)samples[i]
+        // );            
+
