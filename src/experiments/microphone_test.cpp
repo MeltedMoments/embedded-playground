@@ -7,6 +7,10 @@ constexpr int I2S_SCK = 17;
 constexpr int I2S_WS = 18;
 constexpr i2s_port_t I2S_PORT = I2S_NUM_0;
 
+constexpr int SAMPLE_COUNT = 4096;
+constexpr double FULL_SCALE = 33554432.0;  // 2^25    
+
+
 constexpr int PIXEL_PIN = 4;
 constexpr int PIXEL_COUNT = 8;
 constexpr int MIN_LEVEL = 0;
@@ -28,6 +32,7 @@ const uint32_t RED    = strip.Color(255, 0, 0);
 unsigned long last_report_time = 0;
 unsigned long last_sensor_time = 0;
 unsigned int current_level = 0;
+int32_t samples[SAMPLE_COUNT];
 
 void setup_microphone()
 {
@@ -85,6 +90,7 @@ void setup_neopixel() {
 
 void setup() {
     Serial.begin(115200);
+    // delay(10000);
     Serial.println("INMP441 Microphone test");
 
     setup_neopixel();
@@ -92,8 +98,6 @@ void setup() {
 }
 
 void read_microphone() {
-    constexpr int SAMPLE_COUNT = 256;
-    int32_t samples[SAMPLE_COUNT];
     size_t bytes_read = 0;
     esp_err_t result = i2s_read(
         I2S_PORT,
@@ -110,10 +114,8 @@ void read_microphone() {
 
     int samples_read = bytes_read / sizeof(int32_t);
     // just retain the meaningful bits
-    int32_t sampled[SAMPLE_COUNT];      // for shifted values
     for (int i = 0; i < samples_read; i++) {
-        // int32_t raw = samples[i];
-        sampled[i] = samples[i] >> 6;
+        samples[i] >>= 6;
     }    
 
     // calculate the min, max and mean of the samples
@@ -121,43 +123,34 @@ void read_microphone() {
     int32_t maximum = INT32_MIN;
     double total = 0.0;
     for (int i = 0; i < samples_read; i++) {
-        int32_t sample = sampled[i];
+        int32_t sample = samples[i];
         minimum = min(minimum, sample);
         maximum = max(maximum, sample);
         total += sample;
     }
     double mean = total / samples_read;
 
-    // double total = 0.0;
-    // for (int i = 0; i < samples_read; i++) {
-    //     minimum = min(minimum, samples[i]);
-    //     maximum = max(maximum, samples[i]);
-    //     total += samples[i];
-    // }
-    // double mean = total / samples_read;
-
     // Now calculate RMS relative to the mean
     double square_total = 0.0;
     for (int i = 0; i < samples_read; i++) {
-        // int32_t raw = samples[i];
-        // int32_t shifted = raw >> 6;
-        double sample = (double)sampled[i] - mean;
+        double sample = (double)samples[i] - mean;
         square_total += sample * sample;
     }
     double rms = sqrt(square_total / samples_read);
-    // (crudely) convert the rms to dB
+    // (crudely) convert the rms to dB 
     double db = 20.0 * log10(rms);
+    // and db full scale value
+    double dbfs = 20.0 * log10(rms / FULL_SCALE);
+    // convert to SPL (?) using 94 dB SPL  →  -26 dBFS  
+    double db_spl = dbfs + 120.0;
 
     int64_t delta = (int64_t)(maximum) - (int64_t)(minimum);
     Serial.printf(
-        "samples: %d  min: %lld  max: %ld delta %lld rms %.0f mean %.0f raw_db %.1f\r\n",
-        samples_read,
-        (long long)minimum,
-        (long long)maximum,
-        (long long)(maximum - minimum),
+        // "samples: %d  min: %lld  max: %ld delta %lld rms %.0f mean %.0f raw_db %.1f\r\n",
+        "RMS: %.0f dBFS: %.1f estimated SPL: %.1f dB\r\n",
         rms,
-        mean, 
-        db
+        dbfs, 
+        db_spl
     );
 }
 const uint32_t colours[] = {
@@ -206,6 +199,13 @@ void show_noise_level(float raw_intensity) {
     show_pixels(level);
 }
 
+
+void loop() {
+    // Serial.println("loop");
+    read_microphone();
+    // delay(250);
+}
+
 // void read_sensor() {
 //     unsigned long now = millis();
 //     if (now - last_sensor_time >= SENSOR_INTERVAL_MS) {
@@ -223,12 +223,6 @@ void show_noise_level(float raw_intensity) {
 // }
 
 
-void loop() {
-    read_microphone();
-    delay(250);
-}
-
-
         // double sample = (double)samples[i] - mean;
         // square_total += sample * sample;
         // Serial.printf(
@@ -241,4 +235,12 @@ void loop() {
         //     (long)samples[i],
         //     (unsigned long)samples[i]
         // );            
+
+    // double total = 0.0;
+    // for (int i = 0; i < samples_read; i++) {
+    //     minimum = min(minimum, samples[i]);
+    //     maximum = max(maximum, samples[i]);
+    //     total += samples[i];
+    // }
+    // double mean = total / samples_read;
 
