@@ -220,6 +220,26 @@ RST           GPIO 8         reset          purple
     - program in the esp32 env is set as default in PIO, so can build and upload as normal
 - Start soldering! 
 
+- microphone
+```
+INMP441       ESP32-S3   (Colour)
+VDD    ─────> 3V3         red      
+GND    ─────> GND         black       
+SCK    ─────> GPIO 17     blue    I²S bit clock
+WS     ─────> GPIO 18     yellow  I²S word-select / LR clock
+SD     ─────> GPIO 16     green   microphone data -> ESP
+L/R    ─────> GND
+```
+
+### eod
+- neopixel soldered and tested
+- microphone soldered and tested
+- now need to hook the two together
+
+## 20260917
+- Neat new magnetic third hand :)
+- okay first thing is to sort out what the min,max numbers mean
+
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
