@@ -260,6 +260,10 @@ dB SPL = decibels Sound Pressure Level
     - Soldering works, wiring works, code works.
     - And I understand (more or less) what's going on, chat's in Super Teacher Mode, so isn't just feeding me code. 
 
+- Time to start a new repo
+    - TBD: these working-notes are in the embedded-playground repo
+
+    
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
 # ===> I AM HERE MARKER HERE AM I <===
